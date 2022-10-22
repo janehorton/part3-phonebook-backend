@@ -58,21 +58,28 @@ const generateId = () => {
 
 app.post('/api/persons/', (request, response) => {
     const body = request.body;
-    if (!body.content) {
-        request.status(400).json({
-            error: "content missing"
+    
+    if (!body.name || !body.number) {
+        response.status(400).json({
+            error: "specified name and/or number is missing"
         })
     }
+    else if (persons.find(person => person.name === body.name)) {
+        response.status(409).json({
+            error: "specified name already exists in the phonebook"
+        })
+    }
+    else {
+        const person = {
+            name: body.name,
+            number: body.number || "not specified",
+            id: generateId(),
+        };
 
-    const person = {
-        name: body.content,
-        number: body.number || "not specified",
-        id: generateId(),
-    };
+        persons = persons.concat(person);
 
-    persons = persons.concat(person);
-
-    response.json(person);
+        response.json(person);
+    }
 });
 
 const PORT = 3001;
